@@ -1,14 +1,7 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { parseEnv } from "@crm/env";
-
-const LOCAL_HOSTS = new Set([
-	"localhost",
-	"127.0.0.1",
-	"::1",
-	"[::1]",
-	"0.0.0.0",
-]);
+import { LOCAL_HOSTS } from "../src/local-hosts";
 
 const command = process.argv[2] ?? "this command";
 const resolved = resolveDatabaseUrl();
@@ -25,7 +18,7 @@ const host = hostOf(resolved.url);
 
 if (LOCAL_HOSTS.has(host)) process.exit(0);
 
-if (process.env.ALLOW_REMOTE_DB === "1") {
+if (process.env.ALLOW_REMOTE_DB === "1" || resolved.allowRemote) {
 	console.warn(`\n  ⚠ ${command} is running against ${host} — not local.\n`);
 	process.exit(0);
 }
@@ -57,22 +50,36 @@ console.error(
 
 process.exit(1);
 
-function resolveDatabaseUrl(): { url: string; from: string } | null {
+function resolveDatabaseUrl(): {
+	url: string;
+	from: string;
+	allowRemote?: boolean;
+} | null {
 	const root = workspaceRoot();
 
 	if (root) {
 		for (const file of [".env.local", ".env"]) {
 			const path = join(root, file);
 			try {
-				const url = parseEnv(readFileSync(path, "utf8")).DATABASE_URL;
-				if (url) return { url, from: file };
+				const parsed = parseEnv(readFileSync(path, "utf8"));
+				const url = parsed.DATABASE_URL;
+				if (url)
+					return {
+						url,
+						from: file,
+						allowRemote: parsed.ALLOW_REMOTE_DB === "1",
+					};
 			} catch {}
 		}
 	}
 
 	const fromEnvironment = process.env.DATABASE_URL;
 	return fromEnvironment
-		? { url: fromEnvironment, from: "the environment" }
+		? {
+				url: fromEnvironment,
+				from: "the environment",
+				allowRemote: process.env.ALLOW_REMOTE_DB === "1",
+			}
 		: null;
 }
 

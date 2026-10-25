@@ -2,6 +2,7 @@ import "@crm/env/load";
 
 import { PrismaPg } from "@prisma/adapter-pg";
 import { type Prisma, PrismaClient } from "./generated/prisma/client";
+import { LOCAL_HOSTS } from "./local-hosts";
 
 const connectionString =
 	process.env.NODE_ENV === "test" ? testDatabase() : liveDatabase();
@@ -98,9 +99,47 @@ const logDefinitions: Prisma.LogDefinition[] = [
 		: []),
 ];
 
+export type PoolConfig =
+	| string
+	| { connectionString: string; ssl?: { rejectUnauthorized: boolean } };
+
+export function resolvePoolConfig(
+	connectionString: string,
+	allowSelfSigned = process.env.DATABASE_ALLOW_SELF_SIGNED === "true" ||
+		process.env.DATABASE_ALLOW_SELF_SIGNED === "1",
+): PoolConfig {
+	const parsed = new URL(connectionString);
+	const isLocal = LOCAL_HOSTS.has(parsed.hostname);
+	const sslMode = parsed.searchParams.get("sslmode");
+
+	if (isLocal) {
+		return connectionString;
+	}
+
+	if (allowSelfSigned && sslMode !== "verify-full" && sslMode !== "verify-ca") {
+		if (sslMode) {
+			parsed.searchParams.set("sslmode", "no-verify");
+		}
+		return {
+			connectionString: parsed.toString(),
+			ssl: { rejectUnauthorized: false },
+		};
+	}
+
+	if (sslMode) {
+		return connectionString;
+	}
+
+	return {
+		connectionString,
+		ssl: { rejectUnauthorized: true },
+	};
+}
+
 const createPrismaClient = () => {
+	const config = resolvePoolConfig(connectionString);
 	const client = new PrismaClient({
-		adapter: new PrismaPg({ connectionString }),
+		adapter: new PrismaPg(config),
 		log: logDefinitions,
 	});
 

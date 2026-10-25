@@ -34,6 +34,10 @@ export class EnvironmentVariables {
 	})
 	DATABASE_URL!: string;
 
+	@IsOptional()
+	@IsString()
+	DATABASE_ALLOW_SELF_SIGNED?: string;
+
 	@IsString()
 	@MinLength(32, {
 		message:
