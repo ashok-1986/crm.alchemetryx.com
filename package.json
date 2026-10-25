@@ -21,7 +21,7 @@
 		"db:reset": "turbo run db:reset",
 		"db:seed": "turbo run db:seed",
 		"db:studio": "turbo run db:studio",
-		"db:test": "bun run --filter=@crm/db db:test"
+		"db:test": "pnpm --filter @crm/db db:test"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.10",
