@@ -175,3 +175,14 @@ A rebuild drops the database and re-runs every migration, and it says which of t
 two reasons fired. Force one with `bun run db:test --reset`. Nothing else in the
 repo may drop a database, and this may only because the `_test` suffix is checked
 first.
+
+## Deploying to Vercel
+
+The web application deploys to Vercel as a Next.js project.
+
+1. **Root Directory**: Set to `apps/app`.
+2. **Include source files outside the root directory**: Enable this setting for monorepo packages.
+3. **Node.js Version**: 24.
+4. **Build Command**: `pnpm run build` (or leave as default Next.js build).
+5. **Domain**: Connect `crm.alchemetryx.com` under Project Settings → Domains.
+
