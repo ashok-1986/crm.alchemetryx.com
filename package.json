@@ -5,7 +5,8 @@
 	"version": "1.15.3",
 	"scripts": {
 		"prepare": "node -e \"try { require('child_process').execSync('git config core.hooksPath .githooks', { stdio: 'ignore' }) } catch {}\"",
-		"build": "turbo run build",
+		"build": "turbo run build --filter=!agent",
+		"build:all": "turbo run build",
 		"dev": "turbo run dev",
 		"lint": "turbo run lint",
 		"lint:slop": "oxlint",
@@ -34,7 +35,7 @@
 		"typescript": "5.9.2"
 	},
 	"engines": {
-		"node": ">=24"
+		"node": ">=22"
 	},
 	"packageManager": "pnpm@11.24.0",
 	"devEngines": {
