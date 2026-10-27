@@ -2,5 +2,27 @@ packages:
   - "apps/*"
   - "packages/*"
 
-neverBuiltDependencies:
-  - node-liblzma
+confirmModulesPurge: false
+autoInstallPeers: true
+dedupePeerDependents: true
+production: false
+
+overrides:
+  "@better-auth/core": "1.6.25"
+  "@better-auth/utils": "0.4.2"
+  "@better-fetch/fetch": "1.3.1"
+  "better-call": "1.3.7"
+  "kysely": "0.29.7"
+
+allowBuilds:
+  '@carbon/icon-helpers': true
+  '@carbon/icons-react': true
+  '@mongodb-js/zstd': true
+  '@prisma/client': true
+  '@prisma/engines': true
+  '@scarf/scarf': true
+  better-sqlite3: true
+  core-js: true
+  node-liblzma: false
+  prisma: true
+  sharp: true
